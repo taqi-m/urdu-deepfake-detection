@@ -254,7 +254,7 @@ def main():
     
     # Model selection
     st.markdown("### Select Detection Model")
-    col1, col2 = st.columns([2, 1])
+    col1, col2 = st.columns([1, 2])
     with col1:
         model_name = st.selectbox(
             "Choose a model for prediction:",
@@ -264,8 +264,6 @@ def main():
             key='model_selector'
         )
     with col2:
-        st.markdown("")
-        st.markdown("")
         st.info("""
         **SVM**: Support Vector Machine  
         **Logistic Regression**: Linear classifier  
