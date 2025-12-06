@@ -322,14 +322,19 @@ def main():
                 # Display result
                 label_text = label_mapping[str(prediction)]
                 
+                # Calculate actual confidence (for bonafide, invert the probability)
                 if prediction == 0:
                     result_class = "bonafide"
                     icon = "✅"
                     color = "#28a745"
+                    actual_confidence = 1 - confidence  # Invert for bonafide
+                    confidence_label = "Bonafide Confidence"
                 else:
                     result_class = "spoofed"
                     icon = "⚠️"
                     color = "#dc3545"
+                    actual_confidence = confidence
+                    confidence_label = "Deepfake Confidence"
                 
                 st.markdown(f'<div class="result-box {result_class}">{icon} {label_text}</div>', unsafe_allow_html=True)
                 
@@ -338,16 +343,16 @@ def main():
                 with col1:
                     st.metric("Prediction", "Bonafide" if prediction == 0 else "Spoofed")
                 with col2:
-                    st.metric("Confidence Score", f"{confidence:.2%}")
+                    st.metric(confidence_label, f"{actual_confidence:.2%}")
                 with col3:
                     st.metric("Model Used", result_model_name)
                 
                 # Confidence gauge
                 fig_gauge = go.Figure(go.Indicator(
                     mode="gauge+number+delta",
-                    value=confidence * 100,
+                    value=actual_confidence * 100,
                     domain={'x': [0, 1], 'y': [0, 1]},
-                    title={'text': "Confidence Level (%)"},
+                    title={'text': f"{confidence_label} (%)"},
                     gauge={
                         'axis': {'range': [0, 100]},
                         'bar': {'color': color},
