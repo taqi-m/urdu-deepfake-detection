@@ -1,0 +1,48 @@
+{
+    "models": [
+        {
+            "Model": "SVM",
+            "Accuracy": 0.9977924944812362,
+            "Precision": 1.0,
+            "Recall": 0.9955817378497791,
+            "F1-Score": 0.9977859778597786,
+            "AUC-ROC": 0.9999870051113228
+        },
+        {
+            "Model": "Logistic Regression",
+            "Accuracy": 0.9823399558498896,
+            "Precision": 0.983751846381093,
+            "Recall": 0.9808541973490427,
+            "F1-Score": 0.9823008849557522,
+            "AUC-ROC": 0.9973035605994975
+        },
+        {
+            "Model": "Single-Layer Perceptron",
+            "Accuracy": 0.9764532744665195,
+            "Precision": 0.9835575485799701,
+            "Recall": 0.9690721649484536,
+            "F1-Score": 0.9762611275964391,
+            "AUC-ROC": 0.9957528372173612
+        },
+        {
+            "Model": "Deep Neural Network",
+            "Accuracy": 0.9955849889624724,
+            "Precision": 0.9955817378497791,
+            "Recall": 0.9955817378497791,
+            "F1-Score": 0.9955817378497791,
+            "AUC-ROC": 0.9997812527072685
+        }
+    ],
+    "best_model": {
+        "name": "SVM",
+        "f1_score": 0.9977859778597786,
+        "accuracy": 0.9977924944812362
+    },
+    "feature_dimension": 310,
+    "dataset_info": {
+        "train_samples": 5435,
+        "test_samples": 1359,
+        "bonafide_samples": 3398,
+        "spoofed_samples": 3396
+    }
+}

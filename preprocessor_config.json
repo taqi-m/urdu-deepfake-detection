@@ -1,0 +1,8 @@
+{
+    "sr": 16000,
+    "duration": 4.0,
+    "n_mfcc": 13,
+    "n_mel": 128,
+    "n_chroma": 12,
+    "max_samples": 64000
+}
