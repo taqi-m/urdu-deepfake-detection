@@ -51,6 +51,26 @@ st.markdown("""
         color: #721c24;
         border: 3px solid #dc3545;
     }
+    .model-card {
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        border: 2px solid #e0e0e0;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: white;
+        margin: 0.5rem;
+    }
+    .model-card:hover {
+        border-color: #4ECDC4;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .model-card.selected {
+        border-color: #4ECDC4;
+        background-color: #e8f8f7;
+        box-shadow: 0 4px 8px rgba(78,205,196,0.3);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -254,22 +274,26 @@ def main():
     
     # Model selection
     st.markdown("### Select Detection Model")
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        model_name = st.selectbox(
-            "Choose a model for prediction:",
-            list(models.keys()),
-            index=0,
-            help="Select the machine learning model to analyze your audio",
-            key='model_selector'
-        )
-    with col2:
-        st.info("""
-        **SVM**: Support Vector Machine  
-        **Logistic Regression**: Linear classifier  
-        **Perceptron**: Single-layer network  
-        **DNN**: Deep Neural Network
-        """)
+    
+    # Create radio buttons with horizontal layout
+    model_options = list(models.keys())
+    cols = st.columns(4)
+    
+    # Initialize session state for model selection if not exists
+    if 'selected_model' not in st.session_state:
+        st.session_state.selected_model = model_options[0]
+    
+    model_name = st.radio(
+        "Choose a model:",
+        model_options,
+        index=model_options.index(st.session_state.selected_model),
+        key='model_selector',
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+    
+    # Update session state
+    st.session_state.selected_model = model_name
     
     st.markdown("---")
     
