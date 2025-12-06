@@ -9,6 +9,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from io import BytesIO
 import os
+import matplotlib.pyplot as plt
+import librosa.display
 
 # Page configuration
 st.set_page_config(
@@ -212,36 +214,30 @@ def predict_audio(audio_data, sr, model_name, models, scaler, preprocessor):
         return None, None
 
 def plot_waveform(audio_data, sr):
-    """Plot audio waveform"""
+    """Plot audio waveform as static image"""
+    fig, ax = plt.subplots(figsize=(10, 4))
     time = np.arange(0, len(audio_data)) / sr
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=time, y=audio_data, mode='lines', name='Waveform', line=dict(color='#4ECDC4')))
-    fig.update_layout(
-        title='Audio Waveform',
-        xaxis_title='Time (seconds)',
-        yaxis_title='Amplitude',
-        height=300,
-        template='plotly_white'
-    )
+    ax.plot(time, audio_data, color='#4ECDC4', linewidth=0.5)
+    ax.set_title('Audio Waveform', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Time (seconds)', fontsize=11)
+    ax.set_ylabel('Amplitude', fontsize=11)
+    ax.grid(True, alpha=0.3)
+    plt.tight_layout()
     return fig
 
 def plot_spectrogram(audio_data, sr):
-    """Plot mel spectrogram"""
+    """Plot mel spectrogram as static image"""
     mel_spec = librosa.feature.melspectrogram(y=audio_data, sr=sr, n_mels=128)
     mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
     
-    fig = go.Figure(data=go.Heatmap(
-        z=mel_spec_db,
-        colorscale='Viridis',
-        colorbar=dict(title='dB')
-    ))
-    fig.update_layout(
-        title='Mel Spectrogram',
-        xaxis_title='Time Frames',
-        yaxis_title='Mel Frequency Bins',
-        height=400,
-        template='plotly_white'
-    )
+    fig, ax = plt.subplots(figsize=(10, 5))
+    img = librosa.display.specshow(mel_spec_db, x_axis='time', y_axis='mel', 
+                                    sr=sr, cmap='viridis', ax=ax)
+    ax.set_title('Mel Spectrogram', fontsize=14, fontweight='bold')
+    ax.set_xlabel('Time (seconds)', fontsize=11)
+    ax.set_ylabel('Mel Frequency (Hz)', fontsize=11)
+    fig.colorbar(img, ax=ax, format='%+2.0f dB')
+    plt.tight_layout()
     return fig
 
 # Main app
@@ -345,76 +341,79 @@ def main():
             
             # Display results if available
             if st.session_state.analysis_results is not None:
-                results = st.session_state.analysis_results
-                prediction = results['prediction']
-                confidence = results['confidence']
-                result_model_name = results['model_name']
-                result_audio_data = results['audio_data']
-                result_sr = results['sr']
-                
-                # Display result
-                label_text = label_mapping[str(prediction)]
-                
-                # Calculate actual confidence (for bonafide, invert the probability)
-                if prediction == 0:
-                    result_class = "bonafide"
-                    icon = "✅"
-                    color = "#28a745"
-                    actual_confidence = 1 - confidence  # Invert for bonafide
-                    confidence_label = "Bonafide Confidence"
-                else:
-                    result_class = "spoofed"
-                    icon = "⚠️"
-                    color = "#dc3545"
-                    actual_confidence = confidence
-                    confidence_label = "Deepfake Confidence"
-                
-                st.markdown(f'<div class="result-box {result_class}">{icon} {label_text}</div>', unsafe_allow_html=True)
-                
-                # Confidence score
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("Prediction", "Bonafide" if prediction == 0 else "Spoofed")
-                with col2:
-                    st.metric(confidence_label, f"{actual_confidence:.2%}")
-                with col3:
-                    st.metric("Model Used", result_model_name)
-                
-                # Confidence gauge
-                fig_gauge = go.Figure(go.Indicator(
-                    mode="gauge+number+delta",
-                    value=actual_confidence * 100,
-                    domain={'x': [0, 1], 'y': [0, 1]},
-                    title={'text': f"{confidence_label} (%)"},
-                    gauge={
-                        'axis': {'range': [0, 100]},
-                        'bar': {'color': color},
-                        'steps': [
-                            {'range': [0, 50], 'color': "lightgray"},
-                            {'range': [50, 75], 'color': "gray"},
-                            {'range': [75, 100], 'color': "darkgray"}
-                        ],
-                        'threshold': {
-                            'line': {'color': "red", 'width': 4},
-                            'thickness': 0.75,
-                            'value': 90
+                with st.spinner('Loading analysis results...'):
+                    results = st.session_state.analysis_results
+                    prediction = results['prediction']
+                    confidence = results['confidence']
+                    result_model_name = results['model_name']
+                    result_audio_data = results['audio_data']
+                    result_sr = results['sr']
+                    
+                    # Display result
+                    label_text = label_mapping[str(prediction)]
+                    
+                    # Calculate actual confidence (for bonafide, invert the probability)
+                    if prediction == 0:
+                        result_class = "bonafide"
+                        icon = "✅"
+                        color = "#28a745"
+                        actual_confidence = 1 - confidence  # Invert for bonafide
+                        confidence_label = "Bonafide Confidence"
+                    else:
+                        result_class = "spoofed"
+                        icon = "⚠️"
+                        color = "#dc3545"
+                        actual_confidence = confidence
+                        confidence_label = "Deepfake Confidence"
+                    
+                    st.markdown(f'<div class="result-box {result_class}">{icon} {label_text}</div>', unsafe_allow_html=True)
+                    
+                    # Confidence score
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Prediction", "Bonafide" if prediction == 0 else "Spoofed")
+                    with col2:
+                        st.metric(confidence_label, f"{actual_confidence:.2%}")
+                    with col3:
+                        st.metric("Model Used", result_model_name)
+                    
+                    # Confidence gauge
+                    fig_gauge = go.Figure(go.Indicator(
+                        mode="gauge+number+delta",
+                        value=actual_confidence * 100,
+                        domain={'x': [0, 1], 'y': [0, 1]},
+                        title={'text': f"{confidence_label} (%)"},
+                        gauge={
+                            'axis': {'range': [0, 100]},
+                            'bar': {'color': color},
+                            'steps': [
+                                {'range': [0, 50], 'color': "lightgray"},
+                                {'range': [50, 75], 'color': "gray"},
+                                {'range': [75, 100], 'color': "darkgray"}
+                            ],
+                            'threshold': {
+                                'line': {'color': "red", 'width': 4},
+                                'thickness': 0.75,
+                                'value': 90
+                            }
                         }
-                    }
-                ))
-                fig_gauge.update_layout(height=300)
-                st.plotly_chart(fig_gauge, use_container_width=True)
-                
-                # Audio visualizations
-                st.markdown('<div class="sub-header">Audio Analysis</div>', unsafe_allow_html=True)
-                
-                col1, col2 = st.columns(2)
-                with col1:
-                    fig_wave = plot_waveform(result_audio_data, result_sr)
-                    st.plotly_chart(fig_wave, use_container_width=True)
-                
-                with col2:
-                    fig_spec = plot_spectrogram(result_audio_data, result_sr)
-                    st.plotly_chart(fig_spec, use_container_width=True)
+                    ))
+                    fig_gauge.update_layout(height=300)
+                    st.plotly_chart(fig_gauge, use_container_width=True)
+                    
+                    # Audio visualizations
+                    st.markdown('<div class="sub-header">Audio Analysis</div>', unsafe_allow_html=True)
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        fig_wave = plot_waveform(result_audio_data, result_sr)
+                        st.pyplot(fig_wave, use_container_width=True)
+                        plt.close(fig_wave)
+                    
+                    with col2:
+                        fig_spec = plot_spectrogram(result_audio_data, result_sr)
+                        st.pyplot(fig_spec, use_container_width=True)
+                        plt.close(fig_spec)
             
         except Exception as e:
             st.error(f"Error loading audio file: {str(e)}")
