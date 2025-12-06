@@ -236,13 +236,20 @@ def main():
     if models is None:
         st.stop()
     
+    # Initialize session state
+    if 'analysis_results' not in st.session_state:
+        st.session_state.analysis_results = None
+    if 'current_file' not in st.session_state:
+        st.session_state.current_file = None
+    
     # Main content
     st.markdown('<div class="sub-header">Upload Audio File for Detection</div>', unsafe_allow_html=True)
     
     uploaded_file = st.file_uploader(
         "Choose an audio file",
         type=['wav', 'mp3', 'm4a', 'ogg'],
-        help="Upload an audio file to detect if it's real or deepfake"
+        help="Upload an audio file to detect if it's real or deepfake",
+        key='audio_uploader'
     )
     
     # Model selection
@@ -253,7 +260,8 @@ def main():
             "Choose a model for prediction:",
             list(models.keys()),
             index=0,
-            help="Select the machine learning model to analyze your audio"
+            help="Select the machine learning model to analyze your audio",
+            key='model_selector'
         )
     with col2:
         st.markdown("")
@@ -268,12 +276,6 @@ def main():
     st.markdown("---")
     
     if uploaded_file is not None:
-        # Initialize session state for results
-        if 'analysis_results' not in st.session_state:
-            st.session_state.analysis_results = None
-        if 'current_file' not in st.session_state:
-            st.session_state.current_file = None
-        
         # Check if this is a new file
         file_id = f"{uploaded_file.name}_{uploaded_file.size}"
         if st.session_state.current_file != file_id:
