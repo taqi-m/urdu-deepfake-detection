@@ -271,25 +271,25 @@ def main():
     # Model selection
     st.markdown("### Select Detection Model")
     
-    # Create radio buttons with horizontal layout
-    model_options = list(models.keys())
-    cols = st.columns(4)
-    
     # Initialize session state for model selection if not exists
+    model_options = list(models.keys())
     if 'selected_model' not in st.session_state:
         st.session_state.selected_model = model_options[0]
     
-    model_name = st.radio(
-        "Choose a model:",
-        model_options,
-        index=model_options.index(st.session_state.selected_model),
-        key='model_selector',
-        horizontal=True,
-        label_visibility="collapsed"
-    )
+    # Create 4 columns for model buttons
+    cols = st.columns(4)
     
-    # Update session state
-    st.session_state.selected_model = model_name
+    # Create buttons for each model
+    for col, model in zip(cols, model_options):
+        with col:
+            is_selected = st.session_state.selected_model == model
+            button_type = "primary" if is_selected else "secondary"
+            
+            if st.button(model, key=f"model_{model}", use_container_width=True, type=button_type):
+                st.session_state.selected_model = model
+                st.rerun()
+    
+    model_name = st.session_state.selected_model
     
     st.markdown("---")
     
