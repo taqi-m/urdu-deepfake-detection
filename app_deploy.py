@@ -268,6 +268,18 @@ def main():
     st.markdown("---")
     
     if uploaded_file is not None:
+        # Initialize session state for results
+        if 'analysis_results' not in st.session_state:
+            st.session_state.analysis_results = None
+        if 'current_file' not in st.session_state:
+            st.session_state.current_file = None
+        
+        # Check if this is a new file
+        file_id = f"{uploaded_file.name}_{uploaded_file.size}"
+        if st.session_state.current_file != file_id:
+            st.session_state.current_file = file_id
+            st.session_state.analysis_results = None
+        
         # Load audio
         try:
             audio_data, sr = librosa.load(uploaded_file, sr=None)
@@ -287,64 +299,82 @@ def main():
                     )
                     
                     if prediction is not None:
-                        # Display result
-                        label_text = label_mapping[str(prediction)]
-                        
-                        if prediction == 0:
-                            result_class = "bonafide"
-                            icon = "✅"
-                            color = "#28a745"
-                        else:
-                            result_class = "spoofed"
-                            icon = "⚠️"
-                            color = "#dc3545"
-                        
-                        st.markdown(f'<div class="result-box {result_class}">{icon} {label_text}</div>', unsafe_allow_html=True)
-                        
-                        # Confidence score
-                        col1, col2, col3 = st.columns(3)
-                        with col1:
-                            st.metric("Prediction", "Bonafide" if prediction == 0 else "Spoofed")
-                        with col2:
-                            st.metric("Confidence Score", f"{confidence:.2%}")
-                        with col3:
-                            st.metric("Model Used", model_name)
-                        
-                        # Confidence gauge
-                        fig_gauge = go.Figure(go.Indicator(
-                            mode="gauge+number+delta",
-                            value=confidence * 100,
-                            domain={'x': [0, 1], 'y': [0, 1]},
-                            title={'text': "Confidence Level (%)"},
-                            gauge={
-                                'axis': {'range': [0, 100]},
-                                'bar': {'color': color},
-                                'steps': [
-                                    {'range': [0, 50], 'color': "lightgray"},
-                                    {'range': [50, 75], 'color': "gray"},
-                                    {'range': [75, 100], 'color': "darkgray"}
-                                ],
-                                'threshold': {
-                                    'line': {'color': "red", 'width': 4},
-                                    'thickness': 0.75,
-                                    'value': 90
-                                }
-                            }
-                        ))
-                        fig_gauge.update_layout(height=300)
-                        st.plotly_chart(fig_gauge, use_container_width=True)
-                        
-                        # Audio visualizations
-                        st.markdown('<div class="sub-header">Audio Analysis</div>', unsafe_allow_html=True)
-                        
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            fig_wave = plot_waveform(audio_data, sr)
-                            st.plotly_chart(fig_wave, use_container_width=True)
-                        
-                        with col2:
-                            fig_spec = plot_spectrogram(audio_data, sr)
-                            st.plotly_chart(fig_spec, use_container_width=True)
+                        # Store results in session state
+                        st.session_state.analysis_results = {
+                            'prediction': prediction,
+                            'confidence': confidence,
+                            'model_name': model_name,
+                            'audio_data': audio_data,
+                            'sr': sr
+                        }
+            
+            # Display results if available
+            if st.session_state.analysis_results is not None:
+                results = st.session_state.analysis_results
+                prediction = results['prediction']
+                confidence = results['confidence']
+                result_model_name = results['model_name']
+                result_audio_data = results['audio_data']
+                result_sr = results['sr']
+                
+                # Display result
+                label_text = label_mapping[str(prediction)]
+                
+                if prediction == 0:
+                    result_class = "bonafide"
+                    icon = "✅"
+                    color = "#28a745"
+                else:
+                    result_class = "spoofed"
+                    icon = "⚠️"
+                    color = "#dc3545"
+                
+                st.markdown(f'<div class="result-box {result_class}">{icon} {label_text}</div>', unsafe_allow_html=True)
+                
+                # Confidence score
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Prediction", "Bonafide" if prediction == 0 else "Spoofed")
+                with col2:
+                    st.metric("Confidence Score", f"{confidence:.2%}")
+                with col3:
+                    st.metric("Model Used", result_model_name)
+                
+                # Confidence gauge
+                fig_gauge = go.Figure(go.Indicator(
+                    mode="gauge+number+delta",
+                    value=confidence * 100,
+                    domain={'x': [0, 1], 'y': [0, 1]},
+                    title={'text': "Confidence Level (%)"},
+                    gauge={
+                        'axis': {'range': [0, 100]},
+                        'bar': {'color': color},
+                        'steps': [
+                            {'range': [0, 50], 'color': "lightgray"},
+                            {'range': [50, 75], 'color': "gray"},
+                            {'range': [75, 100], 'color': "darkgray"}
+                        ],
+                        'threshold': {
+                            'line': {'color': "red", 'width': 4},
+                            'thickness': 0.75,
+                            'value': 90
+                        }
+                    }
+                ))
+                fig_gauge.update_layout(height=300)
+                st.plotly_chart(fig_gauge, use_container_width=True)
+                
+                # Audio visualizations
+                st.markdown('<div class="sub-header">Audio Analysis</div>', unsafe_allow_html=True)
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    fig_wave = plot_waveform(result_audio_data, result_sr)
+                    st.plotly_chart(fig_wave, use_container_width=True)
+                
+                with col2:
+                    fig_spec = plot_spectrogram(result_audio_data, result_sr)
+                    st.plotly_chart(fig_spec, use_container_width=True)
             
         except Exception as e:
             st.error(f"Error loading audio file: {str(e)}")
