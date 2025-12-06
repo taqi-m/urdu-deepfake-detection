@@ -73,6 +73,48 @@ st.markdown("""
         background-color: #e8f8f7;
         box-shadow: 0 4px 8px rgba(78,205,196,0.3);
     }
+    
+    /* Style radio buttons */
+    div[role="radiogroup"] {
+        display: flex;
+        flex-direction: row;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    div[role="radiogroup"] label {
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid #e0e0e0;
+        flex: 1;
+        min-width: fit-content;
+    }
+    
+    div[role="radiogroup"] label:hover {
+        border-color: #4ECDC4;
+        background-color: #f5fcfb;
+    }
+    
+    div[role="radiogroup"] label[data-checked="true"] {
+        background-color: #e8f8f7;
+        border-color: #4ECDC4;
+        font-weight: 600;
+    }
+    
+    /* Mobile responsive - vertical layout and full width */
+    @media (max-width: 768px) {
+        div[role="radiogroup"] {
+            flex-direction: column;
+        }
+        
+        div[role="radiogroup"] label {
+            width: 100%;
+            max-width: 100%;
+            flex: none;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -276,20 +318,17 @@ def main():
     if 'selected_model' not in st.session_state:
         st.session_state.selected_model = model_options[0]
     
-    # Create 4 columns for model buttons
-    cols = st.columns(4)
+    # Use radio buttons with vertical layout for instant UI update without rerun
+    model_name = st.radio(
+        "Choose a model:",
+        model_options,
+        index=model_options.index(st.session_state.selected_model),
+        key='model_selector',
+        label_visibility="collapsed"
+    )
     
-    # Create buttons for each model
-    for col, model in zip(cols, model_options):
-        with col:
-            is_selected = st.session_state.selected_model == model
-            button_type = "primary" if is_selected else "secondary"
-            
-            if st.button(model, key=f"model_{model}", use_container_width=True, type=button_type):
-                st.session_state.selected_model = model
-                st.rerun()
-    
-    model_name = st.session_state.selected_model
+    # Update session state
+    st.session_state.selected_model = model_name
     
     st.markdown("---")
     
