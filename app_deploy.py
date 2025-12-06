@@ -306,9 +306,20 @@ def main():
         
         # Load audio
         try:
-            audio_data, sr = librosa.load(uploaded_file, sr=None)
+            # Save uploaded file temporarily for librosa to read
+            temp_file_path = f"temp_audio_{uploaded_file.name}"
+            with open(temp_file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            
+            # Load audio from temporary file
+            audio_data, sr = librosa.load(temp_file_path, sr=None)
+            
+            # Clean up temporary file
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
             
             # Display audio player
+            uploaded_file.seek(0)  # Reset file pointer
             st.audio(uploaded_file, format='audio/wav')
             
             # Audio info
