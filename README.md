@@ -1,12 +1,12 @@
 # Urdu Deepfake Audio Detection
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app-url.streamlit.app)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](http://urdu-deepfake-detection-ws3jnz5mc4syxa4ysrufph.streamlit.app/)
 
 A machine learning application for detecting deepfake audio in Urdu using four trained models: SVM, Logistic Regression, Perceptron, and Deep Neural Network.
 
 ## 🚀 Live Demo
 
-Try the live application: **[Launch App](https://your-app-url.streamlit.app)**
+Try the live application: **[Launch App](http://urdu-deepfake-detection-ws3jnz5mc4syxa4ysrufph.streamlit.app/)**
 
 ## 🎯 Features
 
