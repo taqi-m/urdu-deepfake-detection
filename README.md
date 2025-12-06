@@ -27,7 +27,7 @@ Try the live application: **[Launch App](http://urdu-deepfake-detection-ws3jnz5m
 
 1. **Clone the repository**:
 ```bash
-git clone https://github.com/yourusername/urdu-deepfake-detection.git
+git clone https://github.com/taqi-m/urdu-deepfake-detection.git
 cd urdu-deepfake-detection
 ```
 
@@ -142,7 +142,7 @@ This app is deployed on Streamlit Community Cloud. To deploy your own:
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/urdu-deepfake-detection/issues).
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/taqi-m/urdu-deepfake-detection/issues).
 
 ## 📄 License
 
@@ -159,4 +159,4 @@ This project is open source and available for educational and research purposes.
 
 **Made with ❤️ for deepfake detection research**
 
-For questions or support, please [open an issue](https://github.com/yourusername/urdu-deepfake-detection/issues).
+For questions or support, please [open an issue](https://github.com/taqi-m/urdu-deepfake-detection/issues).
